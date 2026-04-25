@@ -135,6 +135,7 @@
       <div class="blink-text">► INSERT USERNAME ◄</div>
       <input class="login-input" id="username-input" type="text" placeholder="SLEEPER USERNAME" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
       <button class="login-btn" id="login-btn" onclick="handleLogin()">► START GAME</button>
+      <div id="login-error" style="display:none;font-family:'Press Start 2P',monospace;font-size:7px;color:#ff2d78;text-shadow:0 0 8px #ff2d78;margin-top:16px;letter-spacing:1px;">⚠ USER NOT FOUND</div>
       <div class="login-note">SLEEPER LEAGUES ONLY · NO PASSWORD NEEDED</div>
     </div>
   </div>
@@ -260,10 +261,27 @@
       const u = document.getElementById("username-input").value.trim();
       if (!u) return;
       const btn = document.getElementById("login-btn");
+      const errEl = document.getElementById("login-error");
       btn.disabled = true;
       btn.textContent = "LOADING...";
-      currentUsername = u;
-      setTimeout(() => showDashboard(u), 1200);
+      errEl.style.display = "none";
+      fetch("https://api.sleeper.app/v1/user/" + encodeURIComponent(u))
+        .then(r => r.json())
+        .then(data => {
+          if (!data || !data.user_id) {
+            btn.disabled = false;
+            btn.textContent = "► START GAME";
+            errEl.style.display = "block";
+          } else {
+            currentUsername = data.display_name || u;
+            showDashboard(currentUsername);
+          }
+        })
+        .catch(() => {
+          btn.disabled = false;
+          btn.textContent = "► START GAME";
+          errEl.style.display = "block";
+        });
     }
 
     document.getElementById("username-input").addEventListener("keydown", e => {
