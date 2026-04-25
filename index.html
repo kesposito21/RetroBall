@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0a14" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="RetroBall" />
+  <title>RetroBall</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html,body{height:100%;background:#0a0a14;overflow-x:hidden;}
+    body{font-family:'Share Tech Mono',monospace;color:#e0e0ff;overscroll-behavior:none;-webkit-tap-highlight-color:transparent;}
+
+```
+.scanlines{position:fixed;inset:0;pointer-events:none;z-index:999;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.18) 2px,rgba(0,0,0,0.18) 4px);}
+.grid-bg{position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(0,245,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,0.04) 1px,transparent 1px);background-size:40px 40px;}
+
+/* LOGIN */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;}
+.login-box{position:relative;z-index:1;width:100%;max-width:360px;text-align:center;}
+.logo{font-family:'Press Start 2P',monospace;font-size:26px;color:#00f5ff;text-shadow:0 0 20px #00f5ff;margin-bottom:6px;letter-spacing:2px;}
+.logo span{color:#ff2d78;text-shadow:0 0 20px #ff2d78;}
+.logo-sub{font-size:10px;color:#505070;letter-spacing:3px;margin-bottom:48px;}
+.blink-text{font-family:'Press Start 2P',monospace;font-size:8px;color:#ffe600;text-shadow:0 0 8px #ffe600;margin-bottom:32px;letter-spacing:1px;animation:blink 1s step-end infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.login-input{width:100%;background:#08080f;border:2px solid #00f5ff;box-shadow:0 0 12px rgba(0,245,255,0.2);color:#00f5ff;padding:14px 16px;font-family:'Share Tech Mono',monospace;font-size:14px;letter-spacing:2px;outline:none;text-align:center;margin-bottom:16px;}
+.login-btn{width:100%;background:#00f5ff;border:none;color:#000;padding:14px;font-family:'Press Start 2P',monospace;font-size:10px;letter-spacing:2px;cursor:pointer;box-shadow:0 0 20px rgba(0,245,255,0.5);transition:all 0.2s;}
+.login-btn:disabled{background:#1a1a2e;box-shadow:none;cursor:not-allowed;}
+.login-note{margin-top:40px;font-size:10px;color:#303050;letter-spacing:1px;}
+
+/* DASHBOARD */
+#dashboard{display:none;}
+.arcade-header{background:#10101e;border-bottom:2px solid #00f5ff;box-shadow:0 0 20px rgba(0,245,255,0.3);position:sticky;top:0;z-index:100;}
+.header-top{display:flex;align-items:center;justify-content:center;padding:14px 16px 10px;position:relative;border-bottom:1px solid #1e1e3a;}
+.header-logo{font-family:'Press Start 2P',monospace;font-size:15px;color:#00f5ff;text-shadow:0 0 10px #00f5ff;letter-spacing:2px;}
+.header-logo span{color:#ff2d78;text-shadow:0 0 10px #ff2d78;}
+.exit-btn{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:1px solid #303050;color:#505070;font-family:'Press Start 2P',monospace;font-size:6px;padding:5px 8px;cursor:pointer;letter-spacing:1px;}
+.ticker{font-family:'Press Start 2P',monospace;font-size:7px;color:#ffe600;text-shadow:0 0 8px #ffe600;text-align:center;padding:6px;letter-spacing:1px;animation:blink 1s step-end infinite;}
+.stats-bar{display:flex;padding:10px 16px;gap:8px;}
+.stat-box{flex:1;border:1px solid;padding:8px 6px;text-align:center;background:rgba(0,0,0,0.4);}
+.stat-label{font-family:'Press Start 2P',monospace;font-size:6px;display:block;margin-bottom:5px;opacity:0.7;}
+.stat-value{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;display:block;line-height:1;}
+
+.section-header{display:flex;align-items:center;gap:10px;padding:16px 14px 8px;}
+.section-title{font-family:'Press Start 2P',monospace;font-size:8px;color:#bf5fff;text-shadow:0 0 8px #bf5fff;letter-spacing:1px;}
+.section-line{flex:1;height:1px;background:linear-gradient(90deg,#bf5fff,transparent);}
+
+/* CARDS */
+.league-card{margin:0 14px 14px;border:1px solid #1e1e3a;background:#10101e;position:relative;overflow:hidden;animation:cardIn 0.25s ease both;}
+@keyframes cardIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+.card-top-bar{height:3px;background:linear-gradient(90deg,#00f5ff,#bf5fff);}
+.card-top-bar.losing{background:linear-gradient(90deg,#ff2d78,#bf5fff);}
+.card-body{padding:12px 14px;cursor:pointer;}
+.card-meta{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.card-meta-left{flex:1;min-width:0;}
+.card-meta-top{display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;}
+.platform-tag{font-family:'Press Start 2P',monospace;font-size:6px;padding:3px 7px;background:rgba(0,245,255,0.1);border:1px solid #00f5ff;color:#00f5ff;text-shadow:0 0 6px #00f5ff;letter-spacing:1px;}
+.league-label{font-size:11px;color:#7070a0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.team-name{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:#e0e0ff;}
+.record-display{text-align:right;flex-shrink:0;margin-left:10px;}
+.record-num{font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;color:#ffe600;text-shadow:0 0 8px #ffe600;line-height:1;}
+.standing-label{font-size:9px;color:#606080;display:block;margin-top:2px;}
+.chevron{display:inline-block;transition:transform 0.3s ease;color:#404060;margin-left:4px;font-size:8px;}
+.chevron.open{transform:rotate(180deg);color:#00f5ff;}
+
+.scores-row{display:flex;align-items:center;background:rgba(0,0,0,0.5);border:1px solid #1e1e3a;padding:10px 14px;margin-bottom:10px;}
+.score-block{flex:1;}
+.score-block.right{text-align:right;}
+.score-lbl{font-size:9px;color:#606080;display:block;margin-bottom:3px;letter-spacing:1px;}
+.score-num{font-family:'Orbitron',sans-serif;font-size:32px;font-weight:900;line-height:1;}
+.score-num.win{color:#39ff14;text-shadow:0 0 12px #39ff14;}
+.score-num.lose{color:#ff2d78;text-shadow:0 0 12px #ff2d78;}
+.score-proj{font-size:9px;color:#505070;display:block;margin-top:3px;}
+.vs-mid{font-family:'Press Start 2P',monospace;font-size:9px;color:#404060;padding:0 12px;}
+
+.result-strip{display:flex;align-items:center;gap:8px;}
+.result-tag{font-family:'Press Start 2P',monospace;font-size:7px;padding:3px 8px;letter-spacing:0.5px;}
+.result-tag.win{color:#39ff14;border:1px solid #39ff14;background:rgba(57,255,20,0.08);}
+.result-tag.lose{color:#ff2d78;border:1px solid #ff2d78;background:rgba(255,45,120,0.08);}
+.bar-track{flex:1;height:8px;background:#1a1a2e;border:1px solid #2a2a4a;overflow:hidden;}
+.bar-fill{height:100%;background:repeating-linear-gradient(90deg,#00f5ff 0,#00f5ff 6px,transparent 6px,transparent 8px);box-shadow:0 0 8px rgba(0,245,255,0.6);transition:width 0.8s ease;}
+.bar-fill.lose{background:repeating-linear-gradient(90deg,#ff2d78 0,#ff2d78 6px,transparent 6px,transparent 8px);box-shadow:0 0 8px rgba(255,45,120,0.6);}
+
+/* ACCORDION */
+.accordion{overflow:hidden;max-height:0;opacity:0;transition:max-height 0.35s cubic-bezier(0.4,0,0.2,1),opacity 0.25s ease;}
+.accordion.open{max-height:900px;opacity:1;}
+.accordion-inner{border-top:1px solid #00f5ff;background:#08080f;}
+.accordion-inner.losing{border-top-color:#ff2d78;}
+
+/* DETAIL */
+.detail-hdr{background:#000;border-bottom:1px solid #00f5ff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;}
+.detail-title{font-family:'Press Start 2P',monospace;font-size:8px;color:#00f5ff;text-shadow:0 0 8px #00f5ff;line-height:1.6;}
+.detail-scores{display:flex;align-items:center;gap:10px;}
+.detail-score{font-family:'Orbitron',sans-serif;font-size:26px;font-weight:900;line-height:1;}
+.detail-sub{font-size:8px;color:#505070;display:block;margin-top:2px;}
+.roster-grid{display:grid;grid-template-columns:1fr 1fr;}
+.roster-col{padding:12px;}
+.roster-col:first-child{border-right:1px solid #1e1e3a;}
+.roster-col-title{font-family:'Press Start 2P',monospace;font-size:6px;letter-spacing:1px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #1e1e3a;}
+.roster-col-title.mine{color:#00f5ff;text-shadow:0 0 6px #00f5ff;}
+.roster-col-title.theirs{color:#ff2d78;text-shadow:0 0 6px #ff2d78;text-align:right;}
+.player-row{display:flex;align-items:center;padding:5px 0;border-bottom:1px solid #141428;gap:5px;}
+.player-row:last-child{border-bottom:none;}
+.player-row.rev{flex-direction:row-reverse;}
+.pos-chip{font-family:'Press Start 2P',monospace;font-size:6px;padding:2px 4px;flex-shrink:0;border:1px solid;min-width:32px;text-align:center;}
+.player-name{font-size:11px;color:#c0c0e0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.player-score{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;min-width:36px;text-align:right;color:#e0e0ff;}
+.status-pip{width:6px;height:6px;border-radius:1px;flex-shrink:0;}
+.panel-footer{border-top:1px solid #1e1e3a;padding:8px 14px;display:flex;justify-content:center;gap:18px;}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:9px;color:#505070;}
+.legend-dot{width:7px;height:7px;border-radius:1px;}
+
+/* INSTALL BANNER */
+#install-banner{display:none;position:fixed;bottom:0;left:0;right:0;background:#10101e;border-top:2px solid #00f5ff;padding:14px 16px 28px;z-index:9999;text-align:center;box-shadow:0 0 20px rgba(0,245,255,0.3);}
+#install-banner p{font-size:12px;color:#c0c0e0;line-height:1.7;}
+#install-banner strong{color:#00f5ff;}
+#install-banner button{margin-top:10px;background:none;border:1px solid #303050;color:#505070;font-family:'Press Start 2P',monospace;font-size:7px;padding:6px 12px;cursor:pointer;letter-spacing:1px;}
+```
+
+  </style>
+</head>
+<body>
+  <div class="scanlines"></div>
+  <div class="grid-bg"></div>
+
+  <div id="login-screen">
+    <div class="login-box">
+      <div class="logo">RETRO<span>BALL</span></div>
+      <div class="logo-sub">FANTASY FOOTBALL HQ</div>
+      <div class="blink-text">► INSERT USERNAME ◄</div>
+      <input class="login-input" id="username-input" type="text" placeholder="SLEEPER USERNAME" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+      <button class="login-btn" id="login-btn" onclick="handleLogin()">► START GAME</button>
+      <div class="login-note">SLEEPER LEAGUES ONLY · NO PASSWORD NEEDED</div>
+    </div>
+  </div>
+
+  <div id="dashboard">
+    <div class="arcade-header">
+      <div class="header-top">
+        <div class="header-logo">RETRO<span>BALL</span></div>
+        <button class="exit-btn" onclick="showLogin()">EXIT</button>
+      </div>
+      <div class="ticker" id="ticker">► WEEK 14 ◄</div>
+      <div class="stats-bar">
+        <div class="stat-box" style="border-color:#bf5fff;">
+          <span class="stat-label" style="color:#bf5fff;">LEAGUES</span>
+          <span class="stat-value" id="stat-leagues" style="color:#bf5fff;text-shadow:0 0 8px #bf5fff;">0</span>
+        </div>
+        <div class="stat-box" id="stat-record-box" style="border-color:#39ff14;">
+          <span class="stat-label" id="stat-record-label" style="color:#39ff14;">RECORD</span>
+          <span class="stat-value" id="stat-record" style="color:#39ff14;font-size:16px;">0W 0L</span>
+        </div>
+        <div class="stat-box" style="border-color:#00f5ff;">
+          <span class="stat-label" style="color:#00f5ff;">TOTAL</span>
+          <span class="stat-value" id="stat-total" style="color:#00f5ff;text-shadow:0 0 8px #00f5ff;font-size:15px;">0</span>
+        </div>
+      </div>
+    </div>
+    <div class="section-header">
+      <span class="section-title">MATCHUPS</span>
+      <div class="section-line"></div>
+    </div>
+    <div id="cards-container"></div>
+  </div>
+
+  <div id="install-banner">
+    <p>Install <strong>RETROBALL</strong> on your iPhone!<br/>Tap <strong>Share ↑</strong> then <strong>"Add to Home Screen"</strong></p>
+    <button onclick="document.getElementById('install-banner').style.display='none'">✕ DISMISS</button>
+  </div>
+
+  <script>
+    const DEMO = {
+      week: 14,
+      leagues: [
+        {
+          id:1, platform:"Sleeper", name:"The Gridiron Gurus", record:"9-4", standing:"2nd",
+          myName:"DrAnarchyMD", myScore:112.4, myProj:138.7,
+          oppName:"GaroppoBros", oppScore:98.6, oppProj:124.3,
+          myPlayers:[
+            {name:"P. Mahomes",pos:"QB",score:28.4,status:"active"},
+            {name:"D. Henry",pos:"RB",score:18.2,status:"active"},
+            {name:"T. Pollard",pos:"RB",score:9.6,status:"active"},
+            {name:"T. Hill",pos:"WR",score:22.8,status:"active"},
+            {name:"S. Diggs",pos:"WR",score:11.4,status:"active"},
+            {name:"T. Kelce",pos:"TE",score:14.2,status:"active"},
+            {name:"D. Adams",pos:"FLEX",score:7.8,status:"active"},
+          ],
+          oppPlayers:[
+            {name:"J. Hurts",pos:"QB",score:31.2,status:"active"},
+            {name:"C. McCaffrey",pos:"RB",score:24.6,status:"active"},
+            {name:"A. Jones",pos:"RB",score:4.2,status:"questionable"},
+            {name:"J. Jefferson",pos:"WR",score:18.4,status:"active"},
+            {name:"D. Metcalf",pos:"WR",score:8.8,status:"active"},
+            {name:"M. Andrews",pos:"TE",score:6.4,status:"active"},
+            {name:"C. Lamb",pos:"FLEX",score:5.0,status:"active"},
+          ]
+        },
+        {
+          id:2, platform:"ESPN", name:"Monday Night Miracles", record:"7-6", standing:"5th",
+          myName:"DrAnarchyMD", myScore:89.3, myProj:121.4,
+          oppName:"TouchdownTerry", oppScore:104.8, oppProj:118.2,
+          myPlayers:[
+            {name:"L. Jackson",pos:"QB",score:24.6,status:"active"},
+            {name:"B. Robinson",pos:"RB",score:14.8,status:"active"},
+            {name:"I. Pacheco",pos:"RB",score:6.2,status:"active"},
+            {name:"A. Cooper",pos:"WR",score:18.4,status:"active"},
+            {name:"G. Pickens",pos:"WR",score:12.6,status:"active"},
+            {name:"D. Waller",pos:"TE",score:8.4,status:"active"},
+            {name:"K. Allen",pos:"FLEX",score:4.3,status:"questionable"},
+          ],
+          oppPlayers:[
+            {name:"D. Prescott",pos:"QB",score:22.4,status:"active"},
+            {name:"J. Taylor",pos:"RB",score:28.6,status:"active"},
+            {name:"T. Sermon",pos:"RB",score:6.4,status:"active"},
+            {name:"S. Lamb",pos:"WR",score:18.2,status:"active"},
+            {name:"T. McLaurin",pos:"WR",score:14.6,status:"active"},
+            {name:"D. Njoku",pos:"TE",score:8.6,status:"active"},
+            {name:"E. Moore",pos:"FLEX",score:6.0,status:"active"},
+          ]
+        },
+        {
+          id:3, platform:"Sleeper", name:"Dynasty Destroyers", record:"11-2", standing:"1st",
+          myName:"DrAnarchyMD", myScore:134.6, myProj:142.8,
+          oppName:"FantasyFreak99", oppScore:96.2, oppProj:108.4,
+          myPlayers:[
+            {name:"J. Allen",pos:"QB",score:38.4,status:"active"},
+            {name:"D. Cook",pos:"RB",score:16.2,status:"active"},
+            {name:"R. Stevenson",pos:"RB",score:18.4,status:"active"},
+            {name:"J. Chase",pos:"WR",score:28.6,status:"active"},
+            {name:"D. Moore",pos:"WR",score:12.4,status:"active"},
+            {name:"T. Hockenson",pos:"TE",score:14.6,status:"active"},
+            {name:"J. Meyers",pos:"FLEX",score:6.0,status:"active"},
+          ],
+          oppPlayers:[
+            {name:"T. Lawrence",pos:"QB",score:18.4,status:"active"},
+            {name:"N. Chubb",pos:"RB",score:22.6,status:"active"},
+            {name:"M. Carter",pos:"RB",score:8.4,status:"active"},
+            {name:"D. Smith",pos:"WR",score:14.6,status:"active"},
+            {name:"C. Kirk",pos:"WR",score:12.2,status:"active"},
+            {name:"P. Freiermuth",pos:"TE",score:12.0,status:"active"},
+            {name:"G. Wilson",pos:"FLEX",score:8.0,status:"active"},
+          ]
+        }
+      ]
+    };
+
+    const posColors = {QB:"#ff2d78",RB:"#39ff14",WR:"#00f5ff",TE:"#ffe600",FLEX:"#bf5fff",K:"#ff9500",DST:"#ff9500"};
+    const statusColor = s => s==="active"?"#39ff14":s==="questionable"?"#ffe600":"#ff2d78";
+
+    let activeCard = null;
+    let tickInterval = null;
+    let currentUsername = "";
+
+    function handleLogin() {
+      const u = document.getElementById("username-input").value.trim();
+      if (!u) return;
+      const btn = document.getElementById("login-btn");
+      btn.disabled = true;
+      btn.textContent = "LOADING...";
+      currentUsername = u;
+      setTimeout(() => showDashboard(u), 1200);
+    }
+
+    document.getElementById("username-input").addEventListener("keydown", e => {
+      if (e.key === "Enter") handleLogin();
+    });
+
+    function showDashboard(username) {
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("dashboard").style.display = "block";
+      renderDashboard(username);
+    }
+
+    function showLogin() {
+      document.getElementById("dashboard").style.display = "none";
+      document.getElementById("login-screen").style.display = "flex";
+      document.getElementById("login-btn").disabled = false;
+      document.getElementById("login-btn").textContent = "► START GAME";
+      document.getElementById("username-input").value = "";
+      activeCard = null;
+      if (tickInterval) clearInterval(tickInterval);
+    }
+
+    function renderDashboard(username) {
+      const leagues = DEMO.leagues;
+      const wins = leagues.filter(l => l.myScore > l.oppScore).length;
+      const losses = leagues.length - wins;
+      const total = leagues.reduce((s,l) => s + l.myScore, 0);
+
+      document.getElementById("stat-leagues").textContent = leagues.length;
+      document.getElementById("stat-record").textContent = wins+"W "+losses+"L";
+      document.getElementById("stat-total").textContent = total.toFixed(1);
+
+      const rc = wins >= losses ? "#39ff14" : "#ff2d78";
+      const rb = document.getElementById("stat-record-box");
+      rb.style.borderColor = rc;
+      document.getElementById("stat-record-label").style.color = rc;
+      document.getElementById("stat-record").style.color = rc;
+      document.getElementById("stat-record").style.textShadow = "0 0 8px "+rc;
+
+      let t = true;
+      document.getElementById("ticker").textContent = "► WEEK "+DEMO.week+" · "+username.toUpperCase()+" ◄";
+      if (tickInterval) clearInterval(tickInterval);
+      tickInterval = setInterval(() => {
+        document.getElementById("ticker").textContent = t
+          ? "► WEEK "+DEMO.week+" · "+username.toUpperCase()+" ◄"
+          : "  WEEK "+DEMO.week+" · "+username.toUpperCase()+"  ";
+        t = !t;
+      }, 1000);
+
+      const container = document.getElementById("cards-container");
+      container.innerHTML = "";
+      leagues.forEach((league, i) => {
+        container.appendChild(buildCard(league, i));
+      });
+    }
+
+    function buildCard(league, idx) {
+      const winning = league.myScore > league.oppScore;
+      const diff = Math.abs(league.myScore - league.oppScore).toFixed(1);
+      const pct = ((league.myScore / (league.myScore + league.oppScore)) * 100).toFixed(1);
+
+      const card = document.createElement("div");
+      card.className = "league-card";
+      card.style.animationDelay = (idx * 0.07)+"s";
+
+      card.innerHTML = `
+        <div class="card-top-bar ${winning?'':'losing'}"></div>
+        <div class="card-body" onclick="toggleCard(${league.id})">
+          <div class="card-meta">
+            <div class="card-meta-left">
+              <div class="card-meta-top">
+                <span class="platform-tag">${league.platform}</span>
+                <span class="league-label">${league.name}</span>
+              </div>
+              <div class="team-name">${league.myName}</div>
+            </div>
+            <div class="record-display">
+              <div class="record-num">${league.record}</div>
+              <span class="standing-label">${league.standing} PLACE <span class="chevron" id="chev-${league.id}">▼</span></span>
+            </div>
+          </div>
+          <div class="scores-row">
+            <div class="score-block">
+              <span class="score-lbl">YOU</span>
+              <div class="score-num ${winning?'win':'lose'}">${league.myScore}</div>
+              <span class="score-proj">PROJ ${league.myProj}</span>
+            </div>
+            <div class="vs-mid">VS</div>
+            <div class="score-block right">
+              <span class="score-lbl">${league.oppName.toUpperCase()}</span>
+              <div class="score-num ${winning?'lose':'win'}">${league.oppScore}</div>
+              <span class="score-proj">PROJ ${league.oppProj}</span>
+            </div>
+          </div>
+          <div class="result-strip">
+            <span class="result-tag ${winning?'win':'lose'}">${winning?'► WIN':'◄ LOSE'} +${diff}</span>
+            <div class="bar-track">
+              <div class="bar-fill ${winning?'':'lose'}" style="width:${pct}%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="accordion" id="acc-${league.id}">
+          <div class="accordion-inner ${winning?'':'losing'}">
+            ${buildDetail(league)}
+          </div>
+        </div>
+      `;
+      return card;
+    }
+
+    function buildDetail(league) {
+      const winning = league.myScore > league.oppScore;
+      const myColor = winning ? "#39ff14" : "#ff2d78";
+      const oppColor = winning ? "#ff2d78" : "#39ff14";
+
+      const buildPlayers = (players, reverse) => players.map(p => {
+        const pc = posColors[p.pos] || "#aaa";
+        const sc = statusColor(p.status);
+        return `<div class="player-row ${reverse?'rev':''}">
+          <div class="pos-chip" style="color:${pc};border-color:${pc};background:${pc}18">${p.pos}</div>
+          <span class="player-name" style="text-align:${reverse?'right':'left'}">${p.name}</span>
+          <span class="player-score">${p.score}</span>
+          <div class="status-pip" style="background:${sc};box-shadow:0 0 5px ${sc}"></div>
+        </div>`;
+      }).join("");
+
+      return `
+        <div class="detail-hdr">
+          <div class="detail-title">${league.name}<br/><span style="color:#505070">WK ${DEMO.week} · ${league.platform}</span></div>
+          <div class="detail-scores">
+            <div style="text-align:right">
+              <div class="detail-score" style="color:${myColor};text-shadow:0 0 10px ${myColor}">${league.myScore}</div>
+              <span class="detail-sub">YOU</span>
+            </div>
+            <div style="font-size:12px;color:#303050">VS</div>
+            <div>
+              <div class="detail-score" style="color:${oppColor};text-shadow:0 0 10px ${oppColor}">${league.oppScore}</div>
+              <span class="detail-sub">${league.oppName.toUpperCase()}</span>
+            </div>
+          </div>
+        </div>
+        <div class="roster-grid">
+          <div class="roster-col">
+            <div class="roster-col-title mine">► YOUR SQUAD</div>
+            ${buildPlayers(league.myPlayers, false)}
+          </div>
+          <div class="roster-col">
+            <div class="roster-col-title theirs">OPPONENT ◄</div>
+            ${buildPlayers(league.oppPlayers, true)}
+          </div>
+        </div>
+        <div class="panel-footer">
+          <div class="legend-item"><div class="legend-dot" style="background:#39ff14;box-shadow:0 0 4px #39ff14"></div>ACTIVE</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ffe600;box-shadow:0 0 4px #ffe600"></div>QUEST.</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ff2d78;box-shadow:0 0 4px #ff2d78"></div>OUT</div>
+        </div>
+      `;
+    }
+
+    function toggleCard(id) {
+      const acc = document.getElementById("acc-"+id);
+      const chev = document.getElementById("chev-"+id);
+      if (activeCard === id) {
+        acc.classList.remove("open");
+        chev.classList.remove("open");
+        activeCard = null;
+      } else {
+        if (activeCard !== null) {
+          const prev = document.getElementById("acc-"+activeCard);
+          const prevChev = document.getElementById("chev-"+activeCard);
+          if (prev) prev.classList.remove("open");
+          if (prevChev) prevChev.classList.remove("open");
+        }
+        acc.classList.add("open");
+        chev.classList.add("open");
+        activeCard = id;
+      }
+    }
+
+    // iOS install banner
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isStandalone = window.navigator.standalone === true;
+    if (isIOS && !isStandalone) {
+      setTimeout(() => {
+        document.getElementById("install-banner").style.display = "block";
+      }, 4000);
+    }
+  </script>
+
+</body>
+</html>
