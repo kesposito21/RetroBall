@@ -54,6 +54,7 @@
 @keyframes cardIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
 .card-top-bar{height:3px;background:linear-gradient(90deg,#00f5ff,#bf5fff);}
 .card-top-bar.losing{background:linear-gradient(90deg,#ff2d78,#bf5fff);}
+.demo-stamp{background:transparent;color:#ffe600;font-family:"Press Start 2P",monospace;font-size:7px;padding:2px 8px;border:1px solid #ffe600;letter-spacing:2px;box-shadow:0 0 8px rgba(255,230,0,0.3);text-shadow:0 0 6px #ffe600;white-space:nowrap;flex-shrink:0;}
 .card-body{padding:12px 14px;cursor:pointer;}
 .card-meta{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
 .card-meta-left{flex:1;min-width:0;}
@@ -335,9 +336,9 @@
             <div class="card-meta-left">
               <div class="card-meta-top">
                 <span class="platform-tag">${league.platform}</span>
-                <span class="league-label">${league.name}</span>
+                <span class="league-label">${league.name}</span><span class="demo-stamp">DEMO</span>
               </div>
-              <div class="team-name">${league.myName}</div>
+              <div class="team-name">${currentUsername}</div>
             </div>
             <div class="record-display">
               <div class="record-num">${league.record}</div>
@@ -395,7 +396,7 @@
           <div class="detail-scores">
             <div style="text-align:right">
               <div class="detail-score" style="color:${myColor};text-shadow:0 0 10px ${myColor}">${league.myScore}</div>
-              <span class="detail-sub">YOU</span>
+              <span class="detail-sub">${currentUsername.toUpperCase()}</span>
             </div>
             <div style="font-size:12px;color:#303050">VS</div>
             <div>
