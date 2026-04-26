@@ -345,12 +345,13 @@
 
     function renderDashboard(username) {
       const leagues = useRealData ? realLeagues : DEMO.leagues;
-      const wins = leagues.filter(l => l.myScore > l.oppScore).length;
-      const losses = leagues.length - wins;
+      const wins = leagues.filter(l => !l.preseason && l.myScore > l.oppScore).length;
+      const activeleagues = leagues.filter(l => !l.preseason).length;
+      const losses = activeleagues - wins;
       const total = leagues.reduce((s,l) => s + l.myScore, 0);
 
       document.getElementById("stat-leagues").textContent = leagues.length;
-      document.getElementById("stat-record").textContent = wins+"W "+losses+"L";
+      document.getElementById("stat-record").textContent = activeleagues === 0 ? "- -" : wins+"W "+losses+"L";
       document.getElementById("stat-total").textContent = total.toFixed(1);
 
       const rc = wins >= losses ? "#39ff14" : "#ff2d78";
