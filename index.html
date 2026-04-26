@@ -20,7 +20,7 @@
 .grid-bg{position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(0,245,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,0.04) 1px,transparent 1px);background-size:40px 40px;}
 
 /* LOGIN */
-#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;}
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;padding-top:calc(env(safe-area-inset-top) + 24px);position:relative;}
 .login-box{position:relative;z-index:1;width:100%;max-width:360px;text-align:center;}
 .logo{font-family:'Press Start 2P',monospace;font-size:26px;color:#00f5ff;text-shadow:0 0 20px #00f5ff;margin-bottom:6px;letter-spacing:2px;}
 .logo span{color:#ff2d78;text-shadow:0 0 20px #ff2d78;}
@@ -34,7 +34,7 @@
 
 /* DASHBOARD */
 #dashboard{display:none;}
-.arcade-header{background:#10101e;border-bottom:2px solid #00f5ff;box-shadow:0 0 20px rgba(0,245,255,0.3);position:sticky;top:0;z-index:100;}
+.arcade-header{background:#10101e;border-bottom:2px solid #00f5ff;box-shadow:0 0 20px rgba(0,245,255,0.3);position:sticky;top:0;z-index:100;padding-top:env(safe-area-inset-top);}
 .header-top{display:flex;align-items:center;justify-content:center;padding:14px 16px 10px;position:relative;border-bottom:1px solid #1e1e3a;}
 .header-logo{font-family:'Press Start 2P',monospace;font-size:15px;color:#00f5ff;text-shadow:0 0 10px #00f5ff;letter-spacing:2px;}
 .header-logo span{color:#ff2d78;text-shadow:0 0 10px #ff2d78;}
@@ -116,7 +116,7 @@
 .legend-dot{width:7px;height:7px;border-radius:1px;}
 
 /* INSTALL BANNER */
-#install-banner{display:none;position:fixed;bottom:0;left:0;right:0;background:#10101e;border-top:2px solid #00f5ff;padding:14px 16px 28px;z-index:9999;text-align:center;box-shadow:0 0 20px rgba(0,245,255,0.3);}
+#install-banner{display:none;position:fixed;bottom:0;left:0;right:0;background:#10101e;border-top:2px solid #00f5ff;padding:14px 16px calc(env(safe-area-inset-bottom) + 14px);z-index:9999;text-align:center;box-shadow:0 0 20px rgba(0,245,255,0.3);}
 #install-banner p{font-size:12px;color:#c0c0e0;line-height:1.7;}
 #install-banner strong{color:#00f5ff;}
 #install-banner button{margin-top:10px;background:none;border:1px solid #303050;color:#505070;font-family:'Press Start 2P',monospace;font-size:7px;padding:6px 12px;cursor:pointer;letter-spacing:1px;}
