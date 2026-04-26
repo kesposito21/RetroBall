@@ -256,6 +256,9 @@
     let activeCard = null;
     let tickInterval = null;
     let currentUsername = "";
+    let realLeagues = [];
+    let useRealData = false;
+    let currentWeek = 14;
 
     function handleLogin() {
       const u = document.getElementById("username-input").value.trim();
@@ -274,7 +277,43 @@
             errEl.style.display = "block";
           } else {
             currentUsername = data.display_name || u;
-            showDashboard(currentUsername);
+            const userId = data.user_id;
+            // Fetch real leagues from Sleeper
+            fetch('https://api.sleeper.app/v1/state/nfl')
+              .then(r => r.json())
+              .then(state => {
+                const season = state.season;
+                const week = state.display_week || state.week || 1;
+                currentWeek = week;
+                return fetch('https://api.sleeper.app/v1/user/' + userId + '/leagues/nfl/' + season);
+              })
+              .then(r => r.json())
+              .then(leagues => {
+                if (leagues && leagues.length > 0) {
+                  realLeagues = leagues.map(l => ({
+                    id: l.league_id,
+                    platform: 'Sleeper',
+                    name: l.name,
+                    record: '0-0',
+                    standing: '-',
+                    myName: currentUsername,
+                    myScore: 0,
+                    myProj: 0,
+                    oppName: 'TBD',
+                    oppScore: 0,
+                    oppProj: 0,
+                    myPlayers: [],
+                    oppPlayers: [],
+                    preseason: true
+                  }));
+                  useRealData = true;
+                } else {
+                  realLeagues = [];
+                  useRealData = false;
+                }
+                showDashboard(currentUsername);
+              })
+              .catch(() => showDashboard(currentUsername));
           }
         })
         .catch(() => {
@@ -305,7 +344,7 @@
     }
 
     function renderDashboard(username) {
-      const leagues = DEMO.leagues;
+      const leagues = useRealData ? realLeagues : DEMO.leagues;
       const wins = leagues.filter(l => l.myScore > l.oppScore).length;
       const losses = leagues.length - wins;
       const total = leagues.reduce((s,l) => s + l.myScore, 0);
@@ -322,12 +361,12 @@
       document.getElementById("stat-record").style.textShadow = "0 0 8px "+rc;
 
       let t = true;
-      document.getElementById("ticker").textContent = "► WEEK "+DEMO.week+" · "+username.toUpperCase()+" ◄";
+      document.getElementById("ticker").textContent = "► WEEK "+currentWeek+" · "+username.toUpperCase()+" ◄";
       if (tickInterval) clearInterval(tickInterval);
       tickInterval = setInterval(() => {
         document.getElementById("ticker").textContent = t
-          ? "► WEEK "+DEMO.week+" · "+username.toUpperCase()+" ◄"
-          : "  WEEK "+DEMO.week+" · "+username.toUpperCase()+"  ";
+          ? "► WEEK "+currentWeek+" · "+username.toUpperCase()+" ◄"
+          : "  WEEK "+currentWeek+" · "+username.toUpperCase()+"  ";
         t = !t;
       }, 1000);
 
@@ -338,8 +377,38 @@
       });
     }
 
+    function buildPreseasonCard(league, idx) {
+      const card = document.createElement('div');
+      card.className = 'league-card';
+      card.style.animationDelay = (idx * 0.07)+'s';
+      card.innerHTML = `
+        <div class="card-top-bar"></div>
+        <div class="card-body">
+          <div class="card-meta">
+            <div class="card-meta-left">
+              <div class="card-meta-top">
+                <span class="platform-tag">${league.platform}</span>
+                <span class="league-label">${league.name}</span>
+              </div>
+              <div class="team-name">${currentUsername}</div>
+            </div>
+            <div class="record-display">
+              <div class="record-num" style="font-size:14px;color:#505070;">PRE</div>
+              <span class="standing-label">SEASON</span>
+            </div>
+          </div>
+          <div style="background:rgba(0,0,0,0.5);border:1px solid #1e1e3a;padding:20px 14px;text-align:center;">
+            <div style="font-family:'Press Start 2P',monospace;font-size:8px;color:#ffe600;text-shadow:0 0 8px #ffe600;margin-bottom:10px;letter-spacing:1px;">⏳ AWAITING DRAFT</div>
+            <div style="font-size:11px;color:#505070;line-height:1.8;">This league hasn't drafted yet.<br/>Check back after your draft!</div>
+          </div>
+        </div>
+      `;
+      return card;
+    }
+
     function buildCard(league, idx) {
       const winning = league.myScore > league.oppScore;
+      if (league.preseason) return buildPreseasonCard(league, idx);
       const diff = Math.abs(league.myScore - league.oppScore).toFixed(1);
       const pct = ((league.myScore / (league.myScore + league.oppScore)) * 100).toFixed(1);
 
@@ -410,7 +479,7 @@
 
       return `
         <div class="detail-hdr">
-          <div class="detail-title">${league.name}<br/><span style="color:#505070">WK ${DEMO.week} · ${league.platform}</span></div>
+          <div class="detail-title">${league.name}<br/><span style="color:#505070">WK ${currentWeek} · ${league.platform}</span></div>
           <div class="detail-scores">
             <div style="text-align:right">
               <div class="detail-score" style="color:${myColor};text-shadow:0 0 10px ${myColor}">${league.myScore}</div>
